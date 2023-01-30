@@ -10,6 +10,7 @@ use parking_lot::RwLock;
 use smallvec::SmallVec;
 
 #[cfg(any(
+    target_arch = "x86",
     target_arch = "x86_64",
     target_arch = "aarch64",
     target_arch = "riscv64",
@@ -35,6 +36,7 @@ pub struct Profiler {
     running: bool,
 
     #[cfg(all(any(
+        target_arch = "x86",
         target_arch = "x86_64",
         target_arch = "aarch64",
         target_arch = "riscv64",
@@ -47,6 +49,7 @@ pub struct Profiler {
 pub struct ProfilerGuardBuilder {
     frequency: c_int,
     #[cfg(all(any(
+        target_arch = "x86",
         target_arch = "x86_64",
         target_arch = "aarch64",
         target_arch = "riscv64",
@@ -61,6 +64,7 @@ impl Default for ProfilerGuardBuilder {
             frequency: 99,
 
             #[cfg(all(any(
+                target_arch = "x86",
                 target_arch = "x86_64",
                 target_arch = "aarch64",
                 target_arch = "riscv64",
@@ -77,6 +81,7 @@ impl ProfilerGuardBuilder {
     }
 
     #[cfg(all(any(
+        target_arch = "x86",
         target_arch = "x86_64",
         target_arch = "aarch64",
         target_arch = "riscv64",
@@ -127,6 +132,7 @@ impl ProfilerGuardBuilder {
             }
             Ok(profiler) => {
                 #[cfg(all(any(
+                    target_arch = "x86",
                     target_arch = "x86_64",
                     target_arch = "aarch64",
                     target_arch = "riscv64",
@@ -265,6 +271,7 @@ impl Drop for ErrnoProtector {
 #[no_mangle]
 #[cfg_attr(
     not(all(any(
+        target_arch = "x86",
         target_arch = "x86_64",
         target_arch = "aarch64",
         target_arch = "riscv64",
@@ -282,6 +289,7 @@ extern "C" fn perf_signal_handler(
     if let Some(mut guard) = PROFILER.try_write() {
         if let Ok(profiler) = guard.as_mut() {
             #[cfg(any(
+                target_arch = "x86",
                 target_arch = "x86_64",
                 target_arch = "aarch64",
                 target_arch = "riscv64",
@@ -289,6 +297,10 @@ extern "C" fn perf_signal_handler(
             ))]
             if !ucontext.is_null() {
                 let ucontext: *mut libc::ucontext_t = ucontext as *mut libc::ucontext_t;
+
+                #[cfg(all(target_arch = "x86", target_os = "linux"))]
+                let addr =
+                    unsafe { (*ucontext).uc_mcontext.gregs[libc::REG_EIP as usize] as usize };
 
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 let addr =
@@ -371,6 +383,7 @@ impl Profiler {
             running: false,
 
             #[cfg(all(any(
+                target_arch = "x86",
                 target_arch = "x86_64",
                 target_arch = "aarch64",
                 target_arch = "riscv64",
@@ -381,6 +394,7 @@ impl Profiler {
     }
 
     #[cfg(all(any(
+        target_arch = "x86",
         target_arch = "x86_64",
         target_arch = "aarch64",
         target_arch = "riscv64",

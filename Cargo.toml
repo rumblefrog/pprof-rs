@@ -1,6 +1,6 @@
 [package]
 name = "pprof"
-version = "0.11.0"
+version = "0.11.1"
 authors = ["Yang Keao <keao.yang@yahoo.com>"]
 edition = "2021"
 license = "Apache-2.0"
@@ -52,6 +52,10 @@ rand = "0.8.0"
 prost-build = { version = "0.11", optional = true }
 sha2 = { version = "0.10", optional = true }
 protobuf-codegen-pure = { version = "2.0", optional = true }
+
+[[example]]
+name = "backtrace_while_sampling"
+required-features = ["flamegraph", "frame-pointer"]
 
 [[example]]
 name = "flamegraph"

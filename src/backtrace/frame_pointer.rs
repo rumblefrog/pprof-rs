@@ -46,6 +46,10 @@ impl super::Trace for Trace {
             return;
         }
 
+        #[cfg(all(target_arch = "x86", target_os = "linux"))]
+        let frame_pointer =
+            unsafe { (*ucontext).uc_mcontext.gregs[libc::REG_EBP as usize] as usize };
+
         #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
         let frame_pointer =
             unsafe { (*ucontext).uc_mcontext.gregs[libc::REG_RBP as usize] as usize };
